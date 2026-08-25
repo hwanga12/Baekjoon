@@ -1,39 +1,39 @@
 def solution(message, spoiler_ranges):
-    words = message.split()
-
     normal = set()
     spoiler = set()
 
-    idx = 0
     word_info = []
+    idx = 0
 
-    # 단어별 위치 저장
-    for word in words:
+    # 단어별 실제 시작/끝 위치 저장
+    for word in message.split():
         start = message.find(word, idx)
         end = start + len(word) - 1
 
         word_info.append((word, start, end))
 
-        idx = end + 2
+        idx = end + 1
 
-    # 1. 스포가 아닌 단어만 normal에 저장
+    # 한 번만 순회
     for word, start, end in word_info:
         is_spoiler = False
 
+        # 이 단어가 스포 구간과 겹치는지 확인
         for s, e in spoiler_ranges:
             if start <= e and s <= end:
                 is_spoiler = True
                 break
 
-        if not is_spoiler:
+        if is_spoiler:
+            # 일반 영역에서 나온 적 없으면 중요한 단어 후보
+            if word not in normal:
+                spoiler.add(word)
+
+        else:
+            # 일반 영역에 등장한 단어
             normal.add(word)
 
-    # 2. 스포 단어 중 normal에 없는 것만 저장
-    for word, start, end in word_info:
-        for s, e in spoiler_ranges:
-            if start <= e and s <= end:
-                if word not in normal:
-                    spoiler.add(word)
-                break
+            # 이전에 스포 후보였어도 일반에 등장했으므로 제거
+            spoiler.discard(word)
 
     return len(spoiler)
